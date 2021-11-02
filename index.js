@@ -1,4 +1,6 @@
+const { response } = require('express');
 const express = require('express');
+const { DB } = require('./config.js');
 
 const db = require("./dbConnectExec.js");
 
@@ -36,3 +38,29 @@ app.get("/movies", (req,res)=>{
     });
 
 });
+
+app.get("/movie/:pk",(req,res)=>{
+
+    let pk = req.params.pk;
+let myQuery =  `SELECT * 
+FROM Movie 
+LEFT JOIN Genre 
+ON Genre.GenrePK = Movie.GenreFK
+where MoviePK = ${pk}`
+
+db.executeQuery(myQuery)
+.then((result)=>{
+    // console.log("result",result);
+
+    if(result[0]){
+        res.send(result[0]);
+    }else {
+        res.status(404).send(`bad request`);
+    }
+}).catch((err)=>{
+    console.log("Error in /movies/:pk",err);
+    res.status(500).send();
+});
+
+});
+
